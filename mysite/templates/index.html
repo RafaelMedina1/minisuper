@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block titlepage %}Pagina de Inicio{% endblock %}
+
+{% block usuario %}
+  {% if user.is_authenticated %}
+  
+    <div class="dropdown">
+
+          {% if user.tipo.id == 1 %}
+            <h5 style="display:inline; margin-right:20px; color:green">${{user.wallet}}</h5>
+          {% endif %}
+
+              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{user.email}}
+              </button>
+              
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/auth/logout/"> Logout </a>
+              </div>
+      </div>
+
+  {% else %}
+    <a class="btn btn-primary" href="/login/">Iniciar Sesion</a>
+  {% endif %}
+  
+{% endblock %}
+
+{% block contenido %}
+
+
+<div class="dropdown">
+  Filtros:
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Categorias
+        </button>
+        
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/"> Todo </a>
+          {% for categoria in categorias %}
+            <a class="dropdown-item" href="/?id={{ categoria.pk }}"> {{categoria.nombre}} </a>
+          {% endfor %}
+        </div>
+</div>
+    
+<section class="features-icons bg-light text-center">
+    <div class="container">
+      <div class="row">
+{% for item in productos %}
+    <div class="col-lg-4">
+            <div class="card">
+                    <img src="" class="card-img-top" alt="">
+                    <div class="card-body">
+                      <img src="{{ item.imagen.url }}" class="card-img-top"/>
+                        <h5 class="card-title">{{item.nombre}}</h5>
+                      <h6 class="card-text">Precio: ${{ item.precio }}</h6>
+
+                      {% if user.tipo.id == 2 %}
+                      <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#inventario{{ item.id }}">Administrar</a>
+
+                      <div class="modal fade" id="inventario{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-scrollable" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalScrollableTitle">Inventario</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <form method="POST" action="/inventario/?id={{ item.pk }}">
+                                  {% csrf_token %}
+                              <div class="modal-body">
+                                      <h4>Cantidad de {{ item.nombre }} para agregar al inventario:</h4>
+                                      <h5>Cantidad Actual: {{ item.stock.cantidad }}</h5>
+                                      <div class="input-group mb-3">
+                                              <div class="input-group-prepend">
+                                                      <span class="input-group-text" id="compra">Cantidad</span>
+                                              </div> 
+                                              <input type="number" step="1" value="1" class="form-control" name="cantidad" aria-label="Default" aria-describedby="inventario">
+                                      </div>
+
+                                      <div class="input-group mb-3">
+                                          <div class="input-group-prepend">
+                                                  <span class="input-group-text" id="compra">Precio $</span>
+                                          </div> 
+                                          <input type="number" step="0.01" value="{{ item.precio }}" class="form-control" name="precio" aria-label="Default" aria-describedby="inventario">
+                                      </div>
+
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary" href="">Modificar</button>
+                              </div>
+                          </form>
+                            </div>
+                          </div>
+                        </div>
+                      
+                      {% elif user.tipo.id == 1 %}
+                      <a href="#" class="btn btn-success" data-toggle="modal" data-target="#comprar{{ item.id }}">Comprar</a>
+
+
+                      <div class="modal fade" id="comprar{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalScrollableTitle">Comprar</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <form method="POST" action="/comprar/">
+                                {% csrf_token %}
+                            <div class="modal-body">
+                              
+                                    <h4>Cantidad de {{ item.nombre }} a comprar:</h4>
+                                    <h5>Precio: ${{ item.precio }}</h5>
+                                    <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="compra">Cantidad</span>
+                                            </div> 
+                                            
+                                            <input type="number" step="1" value="1" class="form-control" name="cantidad" aria-label="Default" aria-describedby="compra">
+                                    </div>
+                                    <input type="number" class="form-control" name="id" style="visibility: hidden;" value="{{ item.id }}">
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                              <button type="submit" class="btn btn-primary" href="">Comprar</button>
+                            </div>
+                        </form>
+                          </div>
+                        </div>
+                      </div>
+
+                      {% else %}
+                      <button class="btn btn-secondary" disabled>Comprar</button>
+                      
+                      {% endif %}
+
+
+                    </div>
+                </div>
+    </div>
+{% endfor %}
+      </div>
+    </div>
+</section>
+
+{% endblock %}

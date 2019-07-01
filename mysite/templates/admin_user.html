@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+
+
+{% block usuario %}
+  {% if user.is_authenticated %}
+  
+    <div class="dropdown">
+
+          {% if user.tipo.id == 1 %}
+            <h5 style="display:inline; margin-right:20px; color:green">${{user.wallet}}</h5>
+          {% endif %}
+
+              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{user.email}}
+              </button>
+              
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/auth/logout/"> Logout </a>
+              </div>
+      </div>
+
+  {% else %}
+    <a class="btn btn-primary" href="/login/">Iniciar Sesion</a>
+  {% endif %}
+  
+{% endblock %}
+
+{% block contenido %}
+
+<table class="table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Wallet</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Edicion</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for user_items in users %}
+                <tr>
+                    <th scope="row">{{user_items.id}}</th>
+                    <td>{{user_items.nombre}}</td>
+                    <td>{{user_items.apellido}}</td>
+                    <td>${{user_items.wallet}}</td>
+                    <td>
+                        {% if user_items.is_active %}
+                            <span class="badge badge-success">Activo</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactivo</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ user_items.tipo.nombre }}
+                    </td>
+
+                    <td>
+                            <a class="btn btn-warning" style="color:white" role="button" data-toggle="modal" data-target="#edit{{ user_items.id }}">Edit</a>
+
+                            <div class="modal fade" id="edit{{ user_items.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable" role="document">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="exampleModalScrollableTitle">Editar Usuario</h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                        </div>
+                                        <form method="POST" action="/administrador/users/save/?id={{ user_items.pk }}">
+                                            {% csrf_token %}
+                                        <div class="modal-body">
+                                                <div class="input-group mb-3">
+                                                        <div class="input-group-prepend">
+                                                          <span class="input-group-text" id="username">Nombre</span>
+                                                        </div>
+                                                        <input type="text" class="form-control" name="username" value="{{user_items.nombre}}" aria-label="Default" aria-describedby="username">
+                                                </div>
+
+                                                <div class="input-group mb-3">
+                                                        <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="userlastname">Apellido</span>
+                                                        </div>
+                                                        <input type="text" class="form-control" name="userlastname" value="{{user_items.apellido}}" aria-label="Default" aria-describedby="userlastname">
+                                                </div>
+
+                                                <div class="input-group mb-3">
+                                                        <div class="input-group-prepend">
+                                                                <span class="input-group-text" id="userwallet">Wallet $</span>
+                                                        </div> 
+                                                        <input type="number" step="0.01" class="form-control" name="userwallet" value="{{user_items.wallet}}" aria-label="Default" aria-describedby="userwallet">
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" name="user_is_active" {% if user_items.is_active %} checked {% endif %} id="customCheck{{user_items.id}}">
+                                                        <label class="custom-control-label" for="customCheck{{user_items.id}}">¿Usuario activo?</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="number" style="visibility: hidden" class="custom-control-input" name="userid" value="{{ user_items.id }}">
+                                                </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                          <button type="submit" class="btn btn-primary" href="">Salvar Cambios</button>
+                                        </div>
+                                    </form>
+                                      </div>
+                                    </div>
+                            </div>
+
+                        {% if user_items.id != user.id %}
+                            <a class="btn btn-danger" style="color:white" role="button" data-toggle="modal" data-target="#delete{{ user_items.id }}">Delete</a>
+                            <div class="modal fade" id="delete{{ user_items.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable" role="document">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="exampleModalScrollableTitle">Eliminar Usuario</h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                        </div>
+                                        <div class="modal-body">
+                                          ¿Seguro que desea eliminar a <b>{{ user_items.nombre }} {{ user_items.apellido }}</b>?
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                          <a class="btn btn-primary" href="/administrador/users/delete/?id={{ user_items.pk }}" >Aceptar</a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
+
+                        {% endif %}
+                        
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+      </table>
+
+
+
+      
+    
+{% endblock %}

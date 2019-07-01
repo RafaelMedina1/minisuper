@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block usuario %}{% endblock %}
+
+{% block contenido %}
+<div class="row">
+<div class="col-lg-4"></div>
+<div class="col-lg-4">
+        
+<form action="/auth/login/" method="POST" style="margin-top:50px; margin-bottom: 50px;">
+  {% csrf_token %}
+        <div class="text-center">
+                <h3>Cuenta del usuario</h3>
+                </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" name="email" class="form-control" id="email">
+    </div>
+    <div class="form-group">
+      <label for="pwd">Contraseña:</label>
+      <input type="password" name="password" class="form-control" id="pwd">
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary" >Iniciar Sesion</button>
+    </div>
+  </form>
+
+</div>
+</div>
+  
+{% endblock %}
