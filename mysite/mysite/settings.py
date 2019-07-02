@@ -140,3 +140,8 @@ DEFENDER_COOLOFF_TIME = 0
 DEFENDER_DISABLE_IP_LOCKOUT = True
 DEFENDER_LOGIN_FAILURE_LIMIT = 2
 DEFENDER_USERNAME_FORM_FIELD = 'email'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
